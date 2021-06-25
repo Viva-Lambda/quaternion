@@ -10,11 +10,11 @@ typedef float real;
 
 /**Quaternion bases*/
 enum QUATERNION_BASE {
-  N, // null value for quaternion base it has no effect on
-     // computation
-  I, // i base for the second quaternion component
-  J, // j base for the third quaternion component
-  K  // k base for the fourth quaternion component
+  SCALAR_BASE, // null value for quaternion base it has no
+               // effect on computation
+  I,           // i base for the second quaternion component
+  J,           // j base for the third quaternion component
+  K            // k base for the fourth quaternion component
 };
 
 /**
@@ -25,19 +25,61 @@ struct quat_c {
   real r;
   quat_c() {}
   quat_c(QUATERNION_BASE b, real a) : base(b), r(a) {}
+  friend std::ostream &operator<<(std::ostream &out,
+                                  const quat_c &c);
 };
+
+std::ostream &operator<<(std::ostream &out,
+                         const quat_c &c) {
+  switch (c.base) {
+  case SCALAR_BASE: {
+    out << "SCALAR_BASE::" << c.r << std::endl;
+  }
+  case I: {
+    out << "I_BASE::" << c.r << std::endl;
+  }
+  case J: {
+    out << "J_BASE::" << c.r << std::endl;
+  }
+  case K: {
+    out << "K_BASE::" << c.r << std::endl;
+  }
+  }
+  return out;
+}
 
 class quaternion {
 public:
-  quaternion() {}
-  quaternion(real x, real y, real z, real w)
-      : coeffs{x, y, z, w} {}
-  quaternion(real c[4]) : coeffs{c[0], c[1], c[2], c[3]} {}
+  quaternion() {
+    coeffs[0] = 0;
+    coeffs[1] = 1;
+    coeffs[2] = 1;
+    coeffs[3] = 1;
+  }
+  quaternion(real x, real y, real z, real w) {
+    coeffs[0] = x;
+    coeffs[1] = y;
+    coeffs[2] = z;
+    coeffs[3] = w;
+  }
+  quaternion(real c[4]) {
+    for (unsigned int i = 0; i < 4; i++) {
+      coeffs[i] = c[i];
+    }
+  }
   quaternion(real c1, const quat_c &qc2, const quat_c &qc3,
-             const quat_c &qc4)
-      : coeffs{c1, qc2.r, qc3.r, qc4.r} {}
-  quaternion(real c1, real cs[3])
-      : coeffs{c1, cs[0], cs[1], cs[2]} {}
+             const quat_c &qc4) {
+    coeffs[0] = c1;
+    coeffs[1] = qc2.r;
+    coeffs[2] = qc3.r;
+    coeffs[3] = qc4.r;
+  }
+  quaternion(real c1, real cs[3]) {
+    coeffs[0] = c1;
+    coeffs[1] = cs[0];
+    coeffs[2] = cs[1];
+    coeffs[3] = cs[2];
+  }
   real scalar() const { return coeffs[0]; }
   void vector(real v[3]) const {
     v[0] = x();
@@ -253,7 +295,9 @@ public:
 
   bool get_component(std::size_t i, quat_c &c) const {
     if (i == 0) {
-      c = quat_c(N, coeffs[0]);
+      quat_c c_;
+      c_.r = coeffs[0];
+      c = quat_c(SCALAR_BASE, coeffs[0]);
       return true;
     } else if (i == 1) {
       c = quat_c(I, coeffs[1]);
@@ -270,7 +314,7 @@ public:
   }
 
 private:
-  real coeffs[4] = {0, 1, 1, 1};
+  real coeffs[4];
 };
 std::ostream &operator<<(std::ostream &out,
                          const quaternion &q) {
