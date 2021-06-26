@@ -74,6 +74,14 @@ public:
     coeffs[2] = qc3.r;
     coeffs[3] = qc4.r;
   }
+
+  quaternion(const quat_c &c1, const quat_c &qc2,
+             const quat_c &qc3, const quat_c &qc4) {
+    coeffs[0] = c1.r;
+    coeffs[1] = qc2.r;
+    coeffs[2] = qc3.r;
+    coeffs[3] = qc4.r;
+  }
   quaternion(real c1, real cs[3]) {
     coeffs[0] = c1;
     coeffs[1] = cs[0];
@@ -168,38 +176,64 @@ public:
     v[2] = z() / t[2];
     return true;
   }
+  /** dot product and cross product for two vec3*/
+  real vector_dot(real t[3]) const {
+    return t[0] * x() + t[1] * y() + t[2] * z();
+  }
+  real vector_dot(real v[3], real t[3]) const {
+    return t[0] * v[0] + t[1] * v[1] + t[2] * v[2];
+  }
+  bool vector_cross(real out[3], real t[3]) const {
+    out[0] = y() * t[2] - z() * t[1];
+    out[1] = z() * t[0] - x() * t[2];
+    out[2] = x() * t[1] - y() * t[0];
+    return true;
+  }
 
   real r() const { return coeffs[0]; }
   real x() const { return coeffs[1]; }
   real y() const { return coeffs[2]; }
   real z() const { return coeffs[3]; }
 
-  quaternion hamilton_product(const quaternion &q) const {
-    //
-    real a1 = r();
-    real a2 = q.r();
-    real b1 = x();
-    real b2 = q.x();
-    real c1 = y();
-    real c2 = q.y();
-    real d1 = z();
-    real d2 = q.z();
-    real a12 = a1 * a2;
-    real b12 = b1 * b2;
-    real c12 = c1 * c2;
-    real d12 = d1 * d2;
-    real r_val = a12 - b12 - c12 - d12;
-    real b_val = a1 * b2 + b1 * a2 + c1 * d2 - d1 * c2;
-    real c_val = a1 * c2 - b1 * d2 + c1 * a2 + d1 * b2;
-    real d_val = a1 * d2 + b1 * c2 - c1 * b2 + d1 * a2;
-    return quaternion(r_val, b_val, c_val, d_val);
+  /** Quaternion product as it is shown by Vince 2011 p.
+   * 63
+   Given a quaternion \f[q_a = [s_a, a]\f] and
+   another quaternion \f[q_b = [s_b, b]\f]
+   Their product is equal to:
+   \f[s_a s_b - a \cdot b, s_a b + s_b a + a \times b \f]
+   */
+  quaternion hamilton_product(const quaternion &q_b) const {
+    // s_a, s_b, a, b
+    real s_a = scalar();
+    real s_b = q_b.scalar();
+    real a[3];
+    vector(a);
+    real b[3];
+    q_b.vector(b);
+
+    // s_a * s_b
+    real s_ab = s_a * s_b;
+
+    // a \cdot b
+    real a_dot_b = vector_dot(a, b);
+
+    // a \times b
+    real cross_ab[3];
+    vector_cross(cross_ab, b);
+
+    // s_a * b + s_b * a + a \times b
+    real out[3];
+    for (unsigned int i = 0; i < 3; i++) {
+      out[i] = s_a * b[i] + s_b * a[i] + cross_ab[i];
+    }
+    return quaternion(s_ab - a_dot_b, out);
   }
   quaternion conjugate() const {
     real a1 = r();
-    real b1 = x();
-    real c1 = y();
-    real d1 = z();
-    return quaternion(a1, -b1, -c1, -d1);
+    real b1 = x() * -1;
+    real c1 = y() * -1;
+    real d1 = z() * -1;
+    return quaternion(a1, b1, c1, d1);
   }
   /**
     \brief from Vince 2011 - Quaternions for Computer
@@ -265,11 +299,17 @@ public:
     return quaternion(scalar() * r, out);
   }
   quaternion power(unsigned int i) const {
-    quaternion result = *this;
-    for (unsigned int j = 0; j < i; j++) {
-      result = *this * result;
+    quaternion accumulant = *this;
+    quaternion result2 = *this;
+    for (unsigned int j = 1; j < i; j++) {
+      accumulant = accumulant.hamilton_product(result2);
     }
-    return result;
+    return accumulant;
+  }
+  quaternion squared() const {
+    quaternion r1 = *this;
+    quaternion r2 = *this;
+    return r1 * r2;
   }
   /**
     \brief from Vince 2011 - Quaternions for Computer
