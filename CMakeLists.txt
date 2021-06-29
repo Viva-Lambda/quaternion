@@ -9,7 +9,7 @@ enable_testing()
 
 set (CMAKE_BUILD_TYPE "Release")
 
-set (CMAKE_CXX_FLAGS "-std=c++03")
+set (CMAKE_CXX_FLAGS "-std=c++98")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -ggdb -Wall -Wextra -ldl")
 
 

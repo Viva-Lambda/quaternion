@@ -11,12 +11,14 @@ using namespace quat;
   quaternion object.
  */
 
+typedef float real;
+
 CTEST(suite, test_scalar1) {
-  quaternion q;
+  quaternion<real> q;
   ASSERT_EQUAL(q.scalar(), 0);
 }
 CTEST(suite, test_vector1) {
-  quaternion q;
+  quaternion<real> q;
   real vs[3];
   q.vector(vs);
   real comp[3] = {1, 1, 1};
@@ -25,27 +27,27 @@ CTEST(suite, test_vector1) {
   ASSERT_EQUAL(vs[2], comp[2]);
 };
 CTEST(suite, test_r) {
-  quaternion q;
+  quaternion<real> q;
   ASSERT_EQUAL(q.r(), 0);
 }
 
 CTEST(suite, test_x) {
-  quaternion q;
+  quaternion<real> q;
   ASSERT_EQUAL(q.x(), 1);
 }
 CTEST(suite, test_y) {
-  quaternion q;
+  quaternion<real> q;
   ASSERT_EQUAL(q.y(), 1);
 }
 CTEST(suite, test_z) {
-  quaternion q;
+  quaternion<real> q;
   ASSERT_EQUAL(q.z(), 1);
 }
 
 /*! @{ test component accessors */
 CTEST(suite, test_get_component_0) {
-  quaternion q(2, 3, 3, 3);
-  quat_c comp;
+  quaternion<real> q(2, 3, 3, 3);
+  quat_c<real> comp;
   bool result = q.get_component(0, comp);
   ASSERT_EQUAL(result, true);
   ASSERT_EQUAL(comp.r, 2);
@@ -53,8 +55,8 @@ CTEST(suite, test_get_component_0) {
 }
 
 CTEST(suite, test_get_component_1) {
-  quaternion q(2, 3, 3, 3);
-  quat_c comp;
+  quaternion<real> q(2, 3, 3, 3);
+  quat_c<real> comp;
   bool result = q.get_component(1, comp);
   ASSERT_EQUAL(result, true);
   ASSERT_EQUAL(comp.r, 3);
@@ -62,8 +64,8 @@ CTEST(suite, test_get_component_1) {
 }
 
 CTEST(suite, test_get_component_2) {
-  quaternion q(2, 3, 3, 3);
-  quat_c comp;
+  quaternion<real> q(2, 3, 3, 3);
+  quat_c<real> comp;
   bool result = q.get_component(2, comp);
   ASSERT_EQUAL(result, true);
   ASSERT_EQUAL(comp.r, 3);
@@ -71,16 +73,16 @@ CTEST(suite, test_get_component_2) {
 }
 
 CTEST(suite, test_get_component_3) {
-  quaternion q(2, 3, 3, 3);
-  quat_c comp;
+  quaternion<real> q(2, 3, 3, 3);
+  quat_c<real> comp;
   bool result = q.get_component(3, comp);
   ASSERT_EQUAL(result, true);
   ASSERT_EQUAL(comp.r, 3);
   ASSERT_EQUAL(comp.base, K);
 }
 CTEST(suite, test_get_component_4) {
-  quaternion q(2, 3, 3, 3);
-  quat_c comp;
+  quaternion<real> q(2, 3, 3, 3);
+  quat_c<real> comp;
   bool result = q.get_component(4, comp);
   ASSERT_EQUAL(result, false);
 }
@@ -90,7 +92,7 @@ CTEST(suite, test_get_component_4) {
 /*! @{ Test constructors of the quaternion object*/
 
 CTEST(suite, test_constructor_0) {
-  quaternion q;
+  quaternion<real> q;
   ASSERT_EQUAL(q.r(), 0);
   ASSERT_EQUAL(q.x(), 1);
   ASSERT_EQUAL(q.y(), 1);
@@ -98,7 +100,7 @@ CTEST(suite, test_constructor_0) {
 }
 
 CTEST(suite, test_constructor_1) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   ASSERT_EQUAL(q.r(), 2);
   ASSERT_EQUAL(q.x(), 3);
   ASSERT_EQUAL(q.y(), 4);
@@ -111,7 +113,7 @@ CTEST(suite, test_constructor_2) {
   cs[1] = 3;
   cs[2] = 4;
   cs[3] = 5;
-  quaternion q(cs);
+  quaternion<real> q(cs);
   ASSERT_EQUAL(q.r(), 2);
   ASSERT_EQUAL(q.x(), 3);
   ASSERT_EQUAL(q.y(), 4);
@@ -119,11 +121,11 @@ CTEST(suite, test_constructor_2) {
 }
 
 CTEST(suite, test_constructor_3) {
-  quat_c c1 = quat_c(SCALAR_BASE, 2);
-  quat_c c2 = quat_c(I, 3);
-  quat_c c3 = quat_c(J, 4);
-  quat_c c4 = quat_c(K, 5);
-  quaternion q(c1, c2, c3, c4);
+  quat_c<real> c1 = quat_c<real>(SCALAR_BASE, 2);
+  quat_c<real> c2 = quat_c<real>(I, 3);
+  quat_c<real> c3 = quat_c<real>(J, 4);
+  quat_c<real> c4 = quat_c<real>(K, 5);
+  quaternion<real> q(c1, c2, c3, c4);
   ASSERT_EQUAL(q.r(), 2);
   ASSERT_EQUAL(q.x(), 3);
   ASSERT_EQUAL(q.y(), 4);
@@ -132,10 +134,10 @@ CTEST(suite, test_constructor_3) {
 
 CTEST(suite, test_constructor_4) {
   real c1 = 2;
-  quat_c c2 = quat_c(I, 3);
-  quat_c c3 = quat_c(J, 4);
-  quat_c c4 = quat_c(K, 5);
-  quaternion q(c1, c2, c3, c4);
+  quat_c<real> c2 = quat_c<real>(I, 3);
+  quat_c<real> c3 = quat_c<real>(J, 4);
+  quat_c<real> c4 = quat_c<real>(K, 5);
+  quaternion<real> q(c1, c2, c3, c4);
   ASSERT_EQUAL(q.r(), 2);
   ASSERT_EQUAL(q.x(), 3);
   ASSERT_EQUAL(q.y(), 4);
@@ -148,7 +150,7 @@ CTEST(suite, test_constructor_5) {
   cs[0] = 3;
   cs[1] = 4;
   cs[2] = 5;
-  quaternion q(c1, cs);
+  quaternion<real> q(c1, cs);
   ASSERT_EQUAL(q.r(), 2);
   ASSERT_EQUAL(q.x(), 3);
   ASSERT_EQUAL(q.y(), 4);
@@ -160,7 +162,7 @@ CTEST(suite, test_constructor_5) {
 /*! @{ Test vector operations */
 
 CTEST(suite, test_vector_multiplication_0) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   bool result = q.vector_multiplication(2);
   ASSERT_EQUAL(q.r(), 2);
   ASSERT_EQUAL(q.x(), 6);
@@ -169,7 +171,7 @@ CTEST(suite, test_vector_multiplication_0) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_multiplication_1) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   real v[3];
   bool result = q.vector_multiplication(v, 2);
   ASSERT_EQUAL(v[0], 6);
@@ -178,7 +180,7 @@ CTEST(suite, test_vector_multiplication_1) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_multiplication_2) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   real v[3];
   real t[3];
   t[0] = 2;
@@ -191,7 +193,7 @@ CTEST(suite, test_vector_multiplication_2) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_addition_0) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   bool result = q.vector_addition(2);
   ASSERT_EQUAL(q.r(), 2);
   ASSERT_EQUAL(q.x(), 5);
@@ -200,7 +202,7 @@ CTEST(suite, test_vector_addition_0) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_addition_1) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   real v[3];
   bool result = q.vector_addition(v, 2);
   ASSERT_EQUAL(v[0], 5);
@@ -209,7 +211,7 @@ CTEST(suite, test_vector_addition_1) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_addition_2) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   real v[3];
   real t[3];
   t[0] = 2;
@@ -222,7 +224,7 @@ CTEST(suite, test_vector_addition_2) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_subtraction_0) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   bool result = q.vector_subtraction(2);
   ASSERT_EQUAL(q.r(), 2);
   ASSERT_EQUAL(q.x(), 1);
@@ -231,7 +233,7 @@ CTEST(suite, test_vector_subtraction_0) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_subtraction_1) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   real v[3];
   bool result = q.vector_subtraction(v, 2);
   ASSERT_EQUAL(v[0], 1);
@@ -240,7 +242,7 @@ CTEST(suite, test_vector_subtraction_1) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_subtraction_2) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   real v[3];
   real t[3];
   t[0] = 2;
@@ -253,7 +255,7 @@ CTEST(suite, test_vector_subtraction_2) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_division_0) {
-  quaternion q(2, 4, 4, 6);
+  quaternion<real> q(2, 4, 4, 6);
   bool result = q.vector_division(2);
   ASSERT_EQUAL(q.r(), 2);
   ASSERT_EQUAL(q.x(), 2);
@@ -262,7 +264,7 @@ CTEST(suite, test_vector_division_0) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_division_1) {
-  quaternion q(2, 2, 4, 6);
+  quaternion<real> q(2, 2, 4, 6);
   real v[3];
   bool result = q.vector_division(v, 2);
   ASSERT_EQUAL(v[0], 1);
@@ -271,7 +273,7 @@ CTEST(suite, test_vector_division_1) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_division_2) {
-  quaternion q(2, 4, 4, 5);
+  quaternion<real> q(2, 4, 4, 5);
   real v[3];
   real t[3];
   t[0] = 2;
@@ -284,18 +286,18 @@ CTEST(suite, test_vector_division_2) {
   ASSERT_EQUAL(result, true);
 }
 CTEST(suite, test_vector_division_3) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   bool result = q.vector_division(static_cast<real>(0));
   ASSERT_EQUAL(result, false);
 }
 CTEST(suite, test_vector_division_4) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   real v[3];
   bool result = q.vector_division(v, static_cast<real>(0));
   ASSERT_EQUAL(result, false);
 }
 CTEST(suite, test_vector_division_5) {
-  quaternion q(2, 3, 4, 5);
+  quaternion<real> q(2, 3, 4, 5);
   real v[3];
   real t[3];
   t[0] = 2;
@@ -305,7 +307,7 @@ CTEST(suite, test_vector_division_5) {
   ASSERT_EQUAL(result, false);
 }
 CTEST(suite, test_vector_dot_0) {
-  quaternion q(1, 9, 2, 7);
+  quaternion<real> q(1, 9, 2, 7);
   real t[3];
   t[0] = 4;
   t[1] = 8;
@@ -314,7 +316,7 @@ CTEST(suite, test_vector_dot_0) {
   ASSERT_EQUAL(result, 122);
 }
 CTEST(suite, test_vector_dot_1) {
-  quaternion q;
+  quaternion<real> q;
   real v[3];
   v[0] = 9;
   v[1] = 2;
@@ -327,7 +329,7 @@ CTEST(suite, test_vector_dot_1) {
   ASSERT_EQUAL(result, 122);
 }
 CTEST(suite, test_vector_cross_0) {
-  quaternion q(1, 2, 3, 4);
+  quaternion<real> q(1, 2, 3, 4);
   real out[3];
   real t[3];
   t[0] = 5;
@@ -345,9 +347,9 @@ CTEST(suite, test_vector_cross_0) {
  * Quaternions for
  * Computer Graphics, p. 70 */
 CTEST(suite, test_hamilton_product) {
-  quaternion q_a(2, -2, 3, -4);
-  quaternion q_b(1, -2, 5, -6);
-  quaternion q_ab = q_a.hamilton_product(q_b);
+  quaternion<real> q_a(2, -2, 3, -4);
+  quaternion<real> q_b(1, -2, 5, -6);
+  quaternion<real> q_ab = q_a.hamilton_product(q_b);
   // quaternion q_ab = q_a * q_b;
   ASSERT_EQUAL(q_ab.r(), static_cast<real>(-41));
   ASSERT_EQUAL(q_ab.x(), static_cast<real>(-4));
@@ -357,19 +359,19 @@ CTEST(suite, test_hamilton_product) {
 /*! @} */
 /*! @{ Test conjugate operation from Vince 2011, p. 70 */
 CTEST(suite, test_conjugate_0) {
-  quaternion q_b(2, -2, 3, -4);
-  quaternion q_a = q_b.conjugate();
+  quaternion<real> q_b(2, -2, 3, -4);
+  quaternion<real> q_a = q_b.conjugate();
   ASSERT_EQUAL(q_a.r(), 2);
   ASSERT_EQUAL(q_a.x(), 2);
   ASSERT_EQUAL(q_a.y(), -3);
   ASSERT_EQUAL(q_a.z(), 4);
 }
 CTEST(suite, test_conjugate_1) {
-  quaternion q_a(2, -2, 3, -4);
-  quaternion q_b(1, -2, 5, -6);
-  quaternion q_ab = q_a.hamilton_product(q_b);
-  quaternion q_ab_conj = q_ab.conjugate();
-  quaternion q_a_conj_b_conj =
+  quaternion<real> q_a(2, -2, 3, -4);
+  quaternion<real> q_b(1, -2, 5, -6);
+  quaternion<real> q_ab = q_a.hamilton_product(q_b);
+  quaternion<real> q_ab_conj = q_ab.conjugate();
+  quaternion<real> q_a_conj_b_conj =
       q_b.conjugate().hamilton_product(q_a.conjugate());
 
   //
@@ -381,9 +383,9 @@ CTEST(suite, test_conjugate_1) {
 
 /*! @{ arithmetic ops for quaternions */
 CTEST(suite, test_plus_operator) {
-  quaternion q_a(2, -2, 3, -4);
-  quaternion q_b(1, -2, 5, -6);
-  quaternion q_ab = q_a + q_b;
+  quaternion<real> q_a(2, -2, 3, -4);
+  quaternion<real> q_b(1, -2, 5, -6);
+  quaternion<real> q_ab = q_a + q_b;
   ASSERT_EQUAL(q_ab.r(), 3);
   ASSERT_EQUAL(q_ab.x(), -4);
   ASSERT_EQUAL(q_ab.y(), 8);
@@ -391,9 +393,9 @@ CTEST(suite, test_plus_operator) {
 }
 
 CTEST(suite, test_minus_operator) {
-  quaternion q_a(2, -2, 3, -4);
-  quaternion q_b(1, -2, 5, -6);
-  quaternion q_ab = q_a - q_b;
+  quaternion<real> q_a(2, -2, 3, -4);
+  quaternion<real> q_b(1, -2, 5, -6);
+  quaternion<real> q_ab = q_a - q_b;
   ASSERT_EQUAL(q_ab.r(), 1);
   ASSERT_EQUAL(q_ab.x(), 0);
   ASSERT_EQUAL(q_ab.y(), -2);
@@ -401,9 +403,9 @@ CTEST(suite, test_minus_operator) {
 }
 
 CTEST(suite, test_star_operator_0) {
-  quaternion q_a(2, -2, 3, -4);
-  quaternion q_b(1, -2, 5, -6);
-  quaternion q_ab = q_a * q_b;
+  quaternion<real> q_a(2, -2, 3, -4);
+  quaternion<real> q_b(1, -2, 5, -6);
+  quaternion<real> q_ab = q_a * q_b;
   ASSERT_EQUAL(q_ab.r(), static_cast<real>(-41));
   ASSERT_EQUAL(q_ab.x(), static_cast<real>(-4));
   ASSERT_EQUAL(q_ab.y(), static_cast<real>(9));
@@ -411,8 +413,8 @@ CTEST(suite, test_star_operator_0) {
 }
 
 CTEST(suite, test_star_operator_1) {
-  quaternion q_a(2, -2, 3, -4);
-  quaternion q_ab = q_a * 2;
+  quaternion<real> q_a(2, -2, 3, -4);
+  quaternion<real> q_ab = q_a * 2;
   ASSERT_EQUAL(q_ab.r(), static_cast<real>(4));
   ASSERT_EQUAL(q_ab.x(), static_cast<real>(-4));
   ASSERT_EQUAL(q_ab.y(), static_cast<real>(6));
@@ -422,14 +424,14 @@ CTEST(suite, test_star_operator_1) {
 
 /*! @{ Test determinant of quaternion */
 CTEST(suite, test_determinant) {
-  quaternion q_a(2, -2, 3, -4);
+  quaternion<real> q_a(2, -2, 3, -4);
   // 4 + 4 + 9 + 16
   ASSERT_EQUAL(q_a.determinant(), static_cast<real>(33));
 }
 
 /*! Test determinant of quaternion */
 CTEST(suite, test_det) {
-  quaternion q_a(2, -2, 3, -4);
+  quaternion<real> q_a(2, -2, 3, -4);
   // 4 + 4 + 9 + 16
   ASSERT_EQUAL(q_a.det(), static_cast<real>(33));
 }
@@ -437,7 +439,7 @@ CTEST(suite, test_det) {
 
 /*! @{ Test magnitude of quaternion */
 CTEST(suite, test_magnitude) {
-  quaternion q_a(2, -2, 3, -4);
+  quaternion<real> q_a(2, -2, 3, -4);
   // 4 + 4 + 9 + 16
   ASSERT_EQUAL(q_a.magnitude(),
                static_cast<real>(sqrt(33)));
@@ -445,7 +447,7 @@ CTEST(suite, test_magnitude) {
 
 /*! Test norm of quaternion */
 CTEST(suite, test_norm) {
-  quaternion q_a(2, -2, 3, -4);
+  quaternion<real> q_a(2, -2, 3, -4);
   // 4 + 4 + 9 + 16
   ASSERT_EQUAL(q_a.norm(), static_cast<real>(sqrt(33)));
 }
@@ -454,8 +456,8 @@ CTEST(suite, test_norm) {
 
 /*! @{ Test exponent of quaternion */
 CTEST(suite, test_squared) {
-  quaternion q_a(2, -2, 3, -4);
-  quaternion q_a2 = q_a.squared();
+  quaternion<real> q_a(2, -2, 3, -4);
+  quaternion<real> q_a2 = q_a.squared();
   ASSERT_EQUAL(q_a2.r(), static_cast<real>(-25));
   ASSERT_EQUAL(q_a2.x(), static_cast<real>(-8));
   ASSERT_EQUAL(q_a2.y(), static_cast<real>(12));
@@ -463,8 +465,8 @@ CTEST(suite, test_squared) {
 }
 
 CTEST(suite, test_power) {
-  quaternion q_a(2, -2, 3, -4);
-  quaternion q_a2 = q_a.power(2);
+  quaternion<real> q_a(2, -2, 3, -4);
+  quaternion<real> q_a2 = q_a.power(2);
   ASSERT_EQUAL(q_a2.r(), static_cast<real>(-25));
   ASSERT_EQUAL(q_a2.x(), static_cast<real>(-8));
   ASSERT_EQUAL(q_a2.y(), static_cast<real>(12));
@@ -475,8 +477,8 @@ CTEST(suite, test_power) {
 
 /*! @{ Test inverse of quaternion */
 CTEST(suite, test_inversed) {
-  quaternion q_a(2, -2, 3, -4);
-  quaternion inv = q_a.inversed();
+  quaternion<real> q_a(2, -2, 3, -4);
+  quaternion<real> inv = q_a.inversed();
   ASSERT_EQUAL(
       inv.r(),
       static_cast<real>(static_cast<real>(1.0 / 33) * 2));
@@ -494,8 +496,8 @@ CTEST(suite, test_inversed) {
 
 /*! @{ Test normalization method of quaternion */
 CTEST(suite, test_normalized) {
-  quaternion q_a(2, -2, 3, -4);
-  quaternion n_q = q_a.normalized();
+  quaternion<real> q_a(2, -2, 3, -4);
+  quaternion<real> n_q = q_a.normalized();
   ASSERT_EQUAL(n_q.r(),
                static_cast<real>(
                    static_cast<real>(1.0 / sqrt(33)) * 2));
