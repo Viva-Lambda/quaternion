@@ -316,7 +316,7 @@ CTEST(suite, test_vector_dot_0) {
   ASSERT_EQUAL(result, 122);
 }
 CTEST(suite, test_vector_dot_1) {
-  quaternion<real> q;
+  quaternion<real> q = quaternion<real>();
   real v[3];
   v[0] = 9;
   v[1] = 2;
@@ -441,8 +441,7 @@ CTEST(suite, test_det) {
 CTEST(suite, test_magnitude) {
   quaternion<real> q_a(2, -2, 3, -4);
   // 4 + 4 + 9 + 16
-  ASSERT_EQUAL(q_a.magnitude(),
-               static_cast<real>(sqrt(33)));
+  ASSERT_EQUAL(q_a.magnitude(), static_cast<real>(sqrt(33)));
 }
 
 /*! Test norm of quaternion */
@@ -479,18 +478,10 @@ CTEST(suite, test_power) {
 CTEST(suite, test_inversed) {
   quaternion<real> q_a(2, -2, 3, -4);
   quaternion<real> inv = q_a.inversed();
-  ASSERT_EQUAL(
-      inv.r(),
-      static_cast<real>(static_cast<real>(1.0 / 33) * 2));
-  ASSERT_EQUAL(
-      inv.x(),
-      static_cast<real>(static_cast<real>(1.0 / 33) * 2));
-  ASSERT_EQUAL(
-      inv.y(),
-      static_cast<real>(static_cast<real>(1.0 / 33) * -3));
-  ASSERT_EQUAL(
-      inv.z(),
-      static_cast<real>(static_cast<real>(1.0 / 33) * 4));
+  ASSERT_EQUAL(inv.r(), static_cast<real>(static_cast<real>(1.0 / 33) * 2));
+  ASSERT_EQUAL(inv.x(), static_cast<real>(static_cast<real>(1.0 / 33) * 2));
+  ASSERT_EQUAL(inv.y(), static_cast<real>(static_cast<real>(1.0 / 33) * -3));
+  ASSERT_EQUAL(inv.z(), static_cast<real>(static_cast<real>(1.0 / 33) * 4));
 }
 /*! @} */
 
@@ -499,16 +490,12 @@ CTEST(suite, test_normalized) {
   quaternion<real> q_a(2, -2, 3, -4);
   quaternion<real> n_q = q_a.normalized();
   ASSERT_EQUAL(n_q.r(),
-               static_cast<real>(
-                   static_cast<real>(1.0 / sqrt(33)) * 2));
+               static_cast<real>(static_cast<real>(1.0 / sqrt(33)) * 2));
   ASSERT_EQUAL(n_q.x(),
-               static_cast<real>(
-                   static_cast<real>(1.0 / sqrt(33)) * -2));
+               static_cast<real>(static_cast<real>(1.0 / sqrt(33)) * -2));
   ASSERT_EQUAL(n_q.y(),
-               static_cast<real>(
-                   static_cast<real>(1.0 / sqrt(33)) * 3));
+               static_cast<real>(static_cast<real>(1.0 / sqrt(33)) * 3));
   ASSERT_EQUAL(n_q.z(),
-               static_cast<real>(
-                   static_cast<real>(1.0 / sqrt(33)) * -4));
+               static_cast<real>(static_cast<real>(1.0 / sqrt(33)) * -4));
 }
 /*! @} */

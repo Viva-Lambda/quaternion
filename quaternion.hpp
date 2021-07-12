@@ -63,13 +63,11 @@ template <class T> struct quat_c {
   quat_c(QUATERNION_BASE b, T a) : base(b), r(a) {}
 
   template <typename K>
-  friend std::ostream &operator<<(std::ostream &out,
-                                  const quat_c<T> &c);
+  friend std::ostream &operator<<(std::ostream &out, const quat_c<T> &c);
 };
 
 template <typename T>
-std::ostream &operator<<(std::ostream &out,
-                         const quat_c<T> &c) {
+std::ostream &operator<<(std::ostream &out, const quat_c<T> &c) {
   switch (c.base) {
   case SCALAR_BASE: {
     out << "SCALAR_BASE::" << c.r << std::endl;
@@ -89,44 +87,22 @@ std::ostream &operator<<(std::ostream &out,
 
 template <class T> class quaternion {
 public:
-  quaternion() {
-    coeffs[0] = static_cast<T>(0);
-    coeffs[1] = static_cast<T>(1);
-    coeffs[2] = static_cast<T>(1);
-    coeffs[3] = static_cast<T>(1);
-  }
-  quaternion(T x, T y, T z, T w) {
-    coeffs[0] = x;
-    coeffs[1] = y;
-    coeffs[2] = z;
-    coeffs[3] = w;
-  }
-  quaternion(const T c[4]) {
-    for (unsigned int i = 0; i < 4; i++) {
-      coeffs[i] = c[i];
-    }
-  }
-  quaternion(T c1, const quat_c<T> &qc2,
-             const quat_c<T> &qc3, const quat_c<T> &qc4) {
-    coeffs[0] = c1;
-    coeffs[1] = qc2.r;
-    coeffs[2] = qc3.r;
-    coeffs[3] = qc4.r;
-  }
+  quaternion()
+      : coeffs{static_cast<T>(0), static_cast<T>(1), static_cast<T>(1),
+               static_cast<T>(1)} {}
 
-  quaternion(const quat_c<T> &c1, const quat_c<T> &qc2,
-             const quat_c<T> &qc3, const quat_c<T> &qc4) {
-    coeffs[0] = c1.r;
-    coeffs[1] = qc2.r;
-    coeffs[2] = qc3.r;
-    coeffs[3] = qc4.r;
-  }
-  quaternion(T c1, T cs[3]) {
-    coeffs[0] = c1;
-    coeffs[1] = cs[0];
-    coeffs[2] = cs[1];
-    coeffs[3] = cs[2];
-  }
+  quaternion(T x, T y, T z, T w) : coeffs{x, y, z, w} {}
+  quaternion(const T c[4]) : coeffs{c[0], c[1], c[2], c[3]} {}
+
+  //
+  quaternion(T c1, const quat_c<T> &qc2, const quat_c<T> &qc3,
+             const quat_c<T> &qc4)
+      : coeffs{c1, qc2.r, qc3.r, qc4.r} {}
+
+  quaternion(const quat_c<T> &c1, const quat_c<T> &qc2, const quat_c<T> &qc3,
+             const quat_c<T> &qc4)
+      : coeffs{c1.r, qc2.r, qc3.r, qc4.r} {}
+  quaternion(T c1, T cs[3]) : coeffs{c1, cs[0], cs[1], cs[2]} {}
   T scalar() const { return coeffs[0]; }
   void vector(T v[3]) const {
     v[0] = x();
@@ -216,9 +192,7 @@ public:
     return true;
   }
   /** dot product and cross product for two vec3*/
-  T vector_dot(T t[3]) const {
-    return t[0] * x() + t[1] * y() + t[2] * z();
-  }
+  T vector_dot(T t[3]) const { return t[0] * x() + t[1] * y() + t[2] * z(); }
   T vector_dot(T v[3], T t[3]) const {
     return t[0] * v[0] + t[1] * v[1] + t[2] * v[2];
   }
@@ -370,8 +344,7 @@ public:
   T det() const { return determinant(); }
   T magnitude() const { return norm(); }
   template <typename K>
-  friend std::ostream &operator<<(std::ostream &out,
-                                  const quaternion<T> &q);
+  friend std::ostream &operator<<(std::ostream &out, const quaternion<T> &q);
 
   bool get_component(std::size_t i, quat_c<T> &c) const {
     if (i == 0) {
@@ -398,13 +371,12 @@ private:
 };
 
 template <typename T>
-std::ostream &operator<<(std::ostream &out,
-                         const quaternion<T> &q) {
+std::ostream &operator<<(std::ostream &out, const quaternion<T> &q) {
   out << q.r() << " + " << q.x() << "i"
       << " + " << q.y() << "j"
       << " + " << q.z() << "k" << std::endl;
   return out;
 }
-};
+}; // namespace quat
 
 #endif
