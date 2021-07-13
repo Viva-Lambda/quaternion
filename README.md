@@ -19,11 +19,31 @@ We provide two versions of the library:
 
 - The all including `quaternion.hpp` which contains the declarations and
   implementations for the methods of the quaternion. This is recommended for
-  most use cases.
+  most use cases:
 
-- The `quaternion.h` and `quaternion.cpp`. The first one contains just the
-  declarations and the second one contains implementations. Note that as
-  stated in [isocpp
+```c++
+// myfile.cpp 
+#include "quaternion.hpp"
+
+using namespace quat11;
+typedef float real;
+
+int maint(){
+  quaternion<real> q;
+  real t = static_cast<real>(4561);
+  auto res = q.scalar(t);
+  bool result = res == SUCCESS && t == 0;
+  if (!result) return -1;
+
+  return 0;
+}
+
+```
+
+- The `quaternion.h` and `quaternion.cpp` are also provided if you had already
+  structured your project to separate declaration and implementation files.
+  The first one contains just the declarations and the second one contains
+  implementations. Note that as stated in [isocpp
   faq](https://isocpp.org/wiki/faq/templates#separate-template-class-defn-from-decl)
   before using templates in this fashion, you have to declare the template
   class with the used type somewhere before usage. You need to have something
@@ -31,6 +51,7 @@ We provide two versions of the library:
 
 ```c++
 // myfile.cpp 
+#include "quaternion.h"
 #include "quaternion.cpp"
 
 using namespace quat11;
