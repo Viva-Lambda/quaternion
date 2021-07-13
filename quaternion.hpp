@@ -37,12 +37,20 @@ SOFTWARE.
 
 #ifndef QUATERNION_HPP
 #define QUATERNION_HPP
+#include <cstdint>
+#include <functional>
 #include <math.h>
 #include <ostream>
 #include <stdio.h>
 
-namespace quat {
+namespace quat11 {
 // holds quaternion related operations
+enum QUATERNION_FLAGS : std::uint_least8_t {
+  SUCCESS = 1,
+  SIZE_ERROR = 2,
+  INDEX_ERROR = 3,
+  ARG_ERROR = 4
+};
 
 /**Quaternion bases*/
 enum QUATERNION_BASE {
@@ -103,110 +111,161 @@ public:
              const quat_c<T> &qc4)
       : coeffs{c1.r, qc2.r, qc3.r, qc4.r} {}
   quaternion(T c1, T cs[3]) : coeffs{c1, cs[0], cs[1], cs[2]} {}
-  T scalar() const { return coeffs[0]; }
-  void vector(T v[3]) const {
-    v[0] = x();
-    v[1] = y();
-    v[2] = z();
+
+  QUATERNION_FLAGS scalar(T &out) const {
+    out = coeffs[0];
+    return SUCCESS;
   }
-  bool vector_multiplication(T t) {
-    coeffs[1] *= t;
-    coeffs[2] *= t;
-    coeffs[3] *= t;
-    return true;
-  }
-  bool vector_addition(T t) {
-    coeffs[1] += t;
-    coeffs[2] += t;
-    coeffs[3] += t;
-    return true;
-  }
-  bool vector_subtraction(T t) {
-    coeffs[1] -= t;
-    coeffs[2] -= t;
-    coeffs[3] -= t;
-    return true;
-  }
-  bool vector_division(T t) {
-    if (t == 0)
-      return false;
-    coeffs[1] /= t;
-    coeffs[2] /= t;
-    coeffs[3] /= t;
-    return true;
+  QUATERNION_FLAGS vector(T v[3]) const {
+    v[0] = coeffs[1];
+    v[1] = coeffs[2];
+    v[2] = coeffs[3];
+    return SUCCESS;
   }
   /** arithmetic operations with a scalar on vector part*/
-  bool vector_multiplication(T v[3], T t) const {
-    v[0] = x() * t;
-    v[1] = y() * t;
-    v[2] = z() * t;
-    return true;
+  QUATERNION_FLAGS
+  apply(T t, const std::function<T(T, T)> &fn, T out[3]) const {
+    T vec[3];
+    auto res = vector(vec);
+
+    if (res != SUCCESS)
+      return res;
+
+    out[0] = fn(vec[0], t);
+    out[1] = fn(vec[1], t);
+    out[2] = fn(vec[2], t);
+    return SUCCESS;
   }
-  bool vector_addition(T v[3], T t) const {
-    v[0] = x() + t;
-    v[1] = y() + t;
-    v[2] = z() + t;
-    return true;
+  QUATERNION_FLAGS
+  apply(T t[3], const std::function<T(T, T)> &fn, T out[3]) const {
+    T vec[3];
+    auto res = vector(vec);
+    if (res != SUCCESS)
+      return res;
+    out[0] = fn(vec[0], t[0]);
+    out[1] = fn(vec[1], t[1]);
+    out[2] = fn(vec[2], t[2]);
+    return SUCCESS;
   }
-  bool vector_subtraction(T v[3], T t) const {
-    v[0] = x() - t;
-    v[1] = y() - t;
-    v[2] = z() - t;
-    return true;
+  QUATERNION_FLAGS
+  apply(const quaternion &q, const std::function<T(T, T)> &fn,
+        quaternion<T> &out) const {
+    //
+    T s = static_cast<T>(0);
+    T qs = static_cast<T>(0);
+    auto res = scalar(s);
+    if (res != SUCCESS)
+      return res;
+    res = q.scalar(qs);
+    if (res != SUCCESS)
+      return res;
+    //
+    T sresult = fn(s, qs);
+
+    T ovec[3];
+    T qvec[3];
+
+    res = q.vector(qvec);
+    if (res != SUCCESS)
+      return res;
+
+    //
+    apply(qvec, fn, ovec);
+
+    // o
+    out = quaternion(sresult, ovec);
+    return SUCCESS;
   }
-  bool vector_division(T v[3], T t) const {
-    if (t == 0)
-      return false;
-    v[0] = x() / t;
-    v[1] = y() / t;
-    v[2] = z() / t;
-    return true;
-  }
-  /** arithmetic operations with a vector on vector part*/
-  bool vector_multiplication(T v[3], T t[3]) const {
-    v[0] = x() * t[0];
-    v[1] = y() * t[1];
-    v[2] = z() * t[2];
-    return true;
-  }
-  bool vector_addition(T v[3], T t[3]) const {
-    v[0] = x() + t[0];
-    v[1] = y() + t[1];
-    v[2] = z() + t[2];
-    return true;
-  }
-  bool vector_subtraction(T v[3], T t[3]) const {
-    v[0] = x() - t[0];
-    v[1] = y() - t[1];
-    v[2] = z() - t[2];
-    return true;
-  }
-  bool vector_division(T v[3], T t[3]) const {
-    for (unsigned int i = 0; i < 3; i++) {
-      if (t[i] == 0)
-        return false;
-    }
-    v[0] = x() / t[0];
-    v[1] = y() / t[1];
-    v[2] = z() / t[2];
-    return true;
-  }
-  /** dot product and cross product for two vec3*/
-  T vector_dot(T t[3]) const { return t[0] * x() + t[1] * y() + t[2] * z(); }
-  T vector_dot(T v[3], T t[3]) const {
-    return t[0] * v[0] + t[1] * v[1] + t[2] * v[2];
-  }
-  bool vector_cross(T out[3], T t[3]) const {
-    out[0] = y() * t[2] - z() * t[1];
-    out[1] = z() * t[0] - x() * t[2];
-    out[2] = x() * t[1] - y() * t[0];
-    return true;
+  QUATERNION_FLAGS
+  apply(const T &q, const std::function<T(T, T)> &fn,
+        quaternion<T> &out) const {
+    T s = static_cast<T>(0);
+    auto res = scalar(s);
+    if (res != SUCCESS)
+      return res;
+
+    // scalar result
+    T sres = fn(s, q);
+
+    T vec[3];
+    res = vector(vec);
+    if (res != SUCCESS)
+      return res;
+
+    //
+    T ovec[3];
+    ovec[0] = fn(vec[0], q);
+    ovec[1] = fn(vec[1], q);
+    ovec[2] = fn(vec[2], q);
+    //
+    out = quaternion(sres, ovec);
+    return SUCCESS;
   }
 
-  T r() const { return coeffs[0]; }
-  T x() const { return coeffs[1]; }
-  T y() const { return coeffs[2]; }
-  T z() const { return coeffs[3]; }
+  QUATERNION_FLAGS vector_multiplication(T t, T out[3]) const {
+    auto fn = [](T thisval, T tval) { return thisval * tval; };
+    return apply(t, fn, out);
+  }
+  QUATERNION_FLAGS vector_addition(T t, T out[3]) const {
+    auto fn = [](T thisval, T tval) { return thisval + tval; };
+    return apply(t, fn, out);
+  }
+  QUATERNION_FLAGS vector_subtraction(T t, T out[3]) const {
+    auto fn = [](T thisval, T tval) { return thisval - tval; };
+    return apply(t, fn, out);
+  }
+  QUATERNION_FLAGS vector_division(T t, T out[3]) const {
+    if (t == 0)
+      return ARG_ERROR;
+    auto fn = [](T thisval, T tval) { return thisval / tval; };
+    return apply(t, fn, out);
+  }
+  /** arithmetic operations with a vector on vector part*/
+  QUATERNION_FLAGS vector_multiplication(T t[3], T out[3]) const {
+    auto fn = [](T thisval, T tval) { return thisval * tval; };
+    return apply(t, fn, out);
+  }
+  QUATERNION_FLAGS vector_addition(T t[3], T out[3]) const {
+
+    auto fn = [](T thisval, T tval) { return thisval + tval; };
+    return apply(t, fn, out);
+  }
+  QUATERNION_FLAGS vector_subtraction(T t[3], T out[3]) const {
+
+    auto fn = [](T thisval, T tval) { return thisval - tval; };
+    return apply(t, fn, out);
+  }
+  QUATERNION_FLAGS vector_division(T t[3], T out[3]) const {
+    for (unsigned int i = 0; i < 3; i++) {
+      if (t[i] == 0)
+        return ARG_ERROR;
+    }
+    auto fn = [](T thisval, T tval) { return thisval / tval; };
+    return apply(t, fn, out);
+  }
+  /** dot product and cross product for two vec3*/
+  QUATERNION_FLAGS vector_dot(T t[3], T &out) const {
+    T v[3];
+    auto res = vector(v);
+    if (res != SUCCESS)
+      return res;
+    return vector_dot(v, t, out);
+  }
+  QUATERNION_FLAGS vector_dot(T v[3], T t[3], T &out) const {
+    out = t[0] * v[0] + t[1] * v[1] + t[2] * v[2];
+    return SUCCESS;
+  }
+  QUATERNION_FLAGS vector_cross(T t[3], T out[3]) const {
+    T vec[3];
+    auto res = vector(vec);
+    if (res != SUCCESS)
+      return res;
+    //
+    out[0] = vec[1] * t[2] - vec[2] * t[1];
+    out[1] = vec[2] * t[0] - vec[0] * t[2];
+    out[2] = vec[0] * t[1] - vec[1] * t[0];
+    return SUCCESS;
+  }
 
   /** Quaternion product as it is shown by Vince 2011 p.
    * 63
@@ -215,154 +274,241 @@ public:
    Their product is equal to:
    \f[s_a s_b - a \cdot b, s_a b + s_b a + a \times b \f]
    */
-  quaternion hamilton_product(const quaternion &q_b) const {
+  QUATERNION_FLAGS
+  hamilton_product(const quaternion &q_b, quaternion<T> &out) const {
     // s_a, s_b, a, b
-    T s_a = scalar();
-    T s_b = q_b.scalar();
+    T s_a = static_cast<T>(0);
+    auto res = scalar(s_a);
+    if (res != SUCCESS)
+      return res;
+
+    T s_b = static_cast<T>(0);
+    res = q_b.scalar(s_b);
+    if (res != SUCCESS)
+      return res;
+
     T a[3];
-    vector(a);
+    res = vector(a);
+    if (res != SUCCESS)
+      return res;
+
     T b[3];
-    q_b.vector(b);
+    res = q_b.vector(b);
+    if (res != SUCCESS)
+      return res;
 
     // s_a * s_b
     T s_ab = s_a * s_b;
 
     // a \cdot b
-    T a_dot_b = vector_dot(a, b);
+    T a_dot_b = static_cast<T>(0);
+    res = vector_dot(a, b, a_dot_b);
+    if (res != SUCCESS)
+      return res;
 
     // a \times b
     T cross_ab[3];
-    vector_cross(cross_ab, b);
+    res = vector_cross(b, cross_ab);
+    if (res != SUCCESS)
+      return res;
 
     // s_a * b + s_b * a + a \times b
-    T out[3];
+    T tout[3];
     for (unsigned int i = 0; i < 3; i++) {
-      out[i] = s_a * b[i] + s_b * a[i] + cross_ab[i];
+      tout[i] = s_a * b[i] + s_b * a[i] + cross_ab[i];
     }
-    return quaternion(s_ab - a_dot_b, out);
+    out = quaternion(s_ab - a_dot_b, tout);
+    return SUCCESS;
   }
-  quaternion conjugate() const {
-    T a1 = r();
-    T b1 = x() * -1;
-    T c1 = y() * -1;
-    T d1 = z() * -1;
-    return quaternion(a1, b1, c1, d1);
+  QUATERNION_FLAGS conjugate(quaternion<T> &out) const {
+    T s = static_cast<T>(0);
+    auto res = scalar(s);
+    if (res != SUCCESS)
+      return res;
+
+    T vec[3];
+    res = vector(vec);
+
+    if (res != SUCCESS)
+      return res;
+
+    res = vector_multiplication(static_cast<T>(-1), vec);
+    if (res != SUCCESS)
+      return res;
+
+    out = quaternion(s, vec);
+    return SUCCESS;
   }
   /**
     \brief from Vince 2011 - Quaternions for Computer
     Graphics p. 69
    */
-  quaternion normalized() const {
-    T inv_mag = static_cast<T>(1.0) / norm();
-    T scalar_part = scalar() * inv_mag;
+  QUATERNION_FLAGS normalized(quaternion<T> &out) const {
+    T nval = static_cast<T>(0);
+    auto res = norm(nval);
+    if (res != SUCCESS)
+      return res;
+    T inv_mag = static_cast<T>(1.0) / nval;
+
+    res = scalar(nval);
+
+    if (res != SUCCESS)
+      return res;
+
+    T scalar_part = nval * inv_mag;
     T vs[3];
-    vector(vs);
-    vector_multiplication(vs, inv_mag);
-    return quaternion(scalar_part, vs);
+    res = vector(vs);
+    if (res != SUCCESS)
+      return res;
+    res = vector_multiplication(inv_mag, vs);
+
+    if (res != SUCCESS)
+      return res;
+    out = quaternion(scalar_part, vs);
+    return SUCCESS;
   }
   /**
     \brief from Vince 2011 - Quaternions for Computer
     Graphics p. 69
    */
-  quaternion inversed() const {
+  QUATERNION_FLAGS inversed(quaternion<T> &out) const {
     //
-    T inv_mag2 = static_cast<T>(1.0) / det();
-    quaternion conj = conjugate();
-    T spart = conj.scalar() * inv_mag2;
+    T det_out = static_cast<T>(0);
+    auto res = det(det_out);
+    if (res != SUCCESS)
+      return res;
+
+    T inv_mag2 = static_cast<T>(1.0) / det_out;
+    quaternion conj;
+
+    res = conjugate(conj);
+    if (res != SUCCESS)
+      return res;
+
+    T conj_scalar = static_cast<T>(0);
+    res = conj.scalar(conj_scalar);
+    if (res != SUCCESS)
+      return res;
+
+    T spart = conj_scalar * inv_mag2;
+
     T vs[3];
-    vector_multiplication(vs, inv_mag2);
-    return quaternion(spart, vs);
+    res = vector_multiplication(inv_mag2, vs);
+    if (res != SUCCESS)
+      return res;
+
+    out = quaternion(spart, vs);
+    return SUCCESS;
   }
   /**
    \brief from Vince 2011 - Quaternions for Computer
    Graphics p. 69
    */
-  quaternion operator+(const quaternion &q) const {
-    T out[3];
-    T vs[3];
-    q.vector(vs);
-    vector_addition(out, vs);
-    return quaternion(scalar() + q.scalar(), out);
+  QUATERNION_FLAGS add(const quaternion &q, quaternion<T> &out) const {
+    auto fn = [](T thisval, T tval) { return thisval + tval; };
+    return apply(q, fn, out);
   }
   /**
    \brief from Vince 2011 - Quaternions for Computer
    Graphics p. 69
   */
-  quaternion operator-(const quaternion &q) const {
-    T out[3];
-    T vs[3];
-    q.vector(vs);
-    vector_subtraction(out, vs);
-    return quaternion(scalar() - q.scalar(), out);
+  QUATERNION_FLAGS subtract(const quaternion &q, quaternion<T> &out) const {
+    auto fn = [](T thisval, T tval) { return thisval - tval; };
+    return apply(q, fn, out);
   }
   /**
     \brief from Vince 2011 - Quaternions for Computer
     Graphics p. 69
    */
-  quaternion operator*(const quaternion &q) const {
-    return hamilton_product(q);
+  QUATERNION_FLAGS product(const quaternion &q, quaternion<T> &out) const {
+    return hamilton_product(q, out);
   }
   /**
     \brief from Vince 2011 - Quaternions for Computer
     Graphics p. 69
    */
-  quaternion operator*(T r) const {
-    T out[3];
-    vector_multiplication(out, r);
-    return quaternion(scalar() * r, out);
+  QUATERNION_FLAGS product(T r, quaternion<T> &out) const {
+    auto fn = [](T thisval, T tval) { return thisval * tval; };
+    return apply(r, fn, out);
   }
-  quaternion power(unsigned int i) const {
+  QUATERNION_FLAGS power(unsigned int i, quaternion<T> &out) const {
     quaternion accumulant = *this;
     quaternion result2 = *this;
     for (unsigned int j = 1; j < i; j++) {
-      accumulant = accumulant.hamilton_product(result2);
+      accumulant.hamilton_product(result2, accumulant);
     }
-    return accumulant;
+    out = accumulant;
+    return SUCCESS;
   }
-  quaternion squared() const {
+  QUATERNION_FLAGS squared(quaternion<T> &out) const {
     quaternion r1 = *this;
     quaternion r2 = *this;
-    return r1 * r2;
+    auto res = product(r1, out);
+    if (res != SUCCESS)
+      return res;
+
+    res = product(r2, out);
+    if (res != SUCCESS)
+      return res;
+    return SUCCESS;
   }
   /**
     \brief from Vince 2011 - Quaternions for Computer
     Graphics p. 69
    */
-  T norm() const { return sqrt(det()); }
+  QUATERNION_FLAGS norm(T &out) const {
+    auto res = det(out);
+
+    if (res != SUCCESS)
+      return res;
+    //
+    out = sqrt(out);
+    return SUCCESS;
+  }
 
   /**
     \brief from Vince 2011 - Quaternions for Computer
     Graphics p. 25
    */
-  T determinant() const {
-    T a2 = r() * r();
-    T b2 = x() * x();
-    T c2 = y() * y();
-    T d2 = z() * z();
-    return a2 + b2 + c2 + d2;
+  QUATERNION_FLAGS determinant(T &out) const {
+    T s = static_cast<T>(0);
+    auto res = scalar(s);
+    if (res != SUCCESS)
+      return res;
+    T vec[3];
+    res = vector(vec);
+    if (res != SUCCESS)
+      return res;
+
+    T a2 = s * s;
+    T b2 = vec[0] * vec[0];
+    T c2 = vec[1] * vec[1];
+    T d2 = vec[2] * vec[2];
+    out = a2 + b2 + c2 + d2;
+    return SUCCESS;
   }
-  T det() const { return determinant(); }
-  T magnitude() const { return norm(); }
+  QUATERNION_FLAGS det(T &out) const { return determinant(out); }
+  QUATERNION_FLAGS magnitude(T &out) const { return norm(out); }
   template <typename K>
   friend std::ostream &operator<<(std::ostream &out, const quaternion<T> &q);
 
-  bool get_component(std::size_t i, quat_c<T> &c) const {
+  QUATERNION_FLAGS get_component(std::size_t i, quat_c<T> &c) const {
     if (i == 0) {
       quat_c<T> c_;
       c_.r = coeffs[0];
       c = quat_c<T>(SCALAR_BASE, coeffs[0]);
-      return true;
+      return SUCCESS;
     } else if (i == 1) {
       c = quat_c<T>(I, coeffs[1]);
-      return true;
+      return SUCCESS;
     } else if (i == 2) {
       c = quat_c<T>(J, coeffs[2]);
-      return true;
+      return SUCCESS;
     } else if (i == 3) {
       c = quat_c<T>(K, coeffs[3]);
-      return true;
+      return SUCCESS;
     } else {
-      return false;
+      return ARG_ERROR;
     }
   }
 
@@ -377,6 +523,60 @@ std::ostream &operator<<(std::ostream &out, const quaternion<T> &q) {
       << " + " << q.z() << "k" << std::endl;
   return out;
 }
-}; // namespace quat
+
+#define CHECK(call)                                                            \
+  do {                                                                         \
+    QUATERNION_FLAGS res = call;                                               \
+    return res == SUCCESS;                                                     \
+  } while (0)
+
+#define INFO(call)                                                             \
+  do {                                                                         \
+    QUATERNION_FLAGS res = call;                                               \
+    switch (res) {                                                             \
+    case SUCCESS: {                                                            \
+      break;                                                                   \
+    }                                                                          \
+    case SIZE_ERROR: {                                                         \
+      std::cout << "SIZE_ERROR "                                               \
+                << " :: " << __FILE__ << " :: " << __LINE__ << std::endl;      \
+    }                                                                          \
+    case INDEX_ERROR: {                                                        \
+      std::cout << "INDEX_ERROR at "                                           \
+                << " :: " << __FILE__ << " :: " << __LINE__ << std::endl;      \
+    }                                                                          \
+    case ARG_ERROR: {                                                          \
+      std::cout << "ARG_ERROR at "                                             \
+                << " :: " << __FILE__ << " :: " << __LINE__ << std::endl;      \
+    }                                                                          \
+    }                                                                          \
+    return res;                                                                \
+  } while (0)
+
+#define INFO_VERBOSE(call)                                                     \
+  do {                                                                         \
+    QUATERNION_FLAGS res = call;                                               \
+    switch (res) {                                                             \
+    case SUCCESS: {                                                            \
+      std::cout << "SUCCESS" << std::endl;                                     \
+      break;                                                                   \
+    }                                                                          \
+    case SIZE_ERROR: {                                                         \
+      std::cout << "SIZE_ERROR "                                               \
+                << " :: " << __FILE__ << " :: " << __LINE__ << std::endl;      \
+    }                                                                          \
+    case INDEX_ERROR: {                                                        \
+      std::cout << "INDEX_ERROR "                                              \
+                << " :: " << __FILE__ << " :: " << __LINE__ << std::endl;      \
+    }                                                                          \
+    case ARG_ERROR: {                                                          \
+      std::cout << "ARG_ERROR "                                                \
+                << " :: " << __FILE__ << " :: " << __LINE__ << std::endl;      \
+    }                                                                          \
+    }                                                                          \
+    return res;                                                                \
+  } while (0)
+
+}; // namespace quat11
 
 #endif

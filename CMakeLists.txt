@@ -21,7 +21,7 @@ set (TEST_DIR "${PROJECT_SOURCE_DIR}/tests")
 
 set (TEST_MAIN "${PROJECT_SOURCE_DIR}/test.c")
 
-file(GLOB test_files "${TEST_DIR}/*.cpp")
+file(GLOB test_files "${TEST_DIR}/test*.cpp")
 
 foreach(test_file ${test_files})
     message(STATUS "test file ${test_file}")
